@@ -1,14 +1,9 @@
-import ezdxf
-import os
-
-
-def create_dxf_file():
-    doc = ezdxf.new('R12')
-    doc.saveas('dxf_files/Test_file.dxf')
+from Interface import ProgrammInterface
 
 
 def main():
-    create_dxf_file()
+    window = ProgrammInterface()
+    window.change_window_size()
 
 
 if __name__ == '__main__':
