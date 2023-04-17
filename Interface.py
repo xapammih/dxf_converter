@@ -34,6 +34,7 @@ class ProgrammInterface:
         self.draw_poliline_button()
         self.saving_files_button()
         self.choose_morpho_to_draw()
+        self.get_morpho_data_button()
 
         self.window.mainloop()
 
@@ -107,42 +108,45 @@ class ProgrammInterface:
         Отрисовка полилинии
         :return:
         """
-        morpho = DXFFileWorker(self.window, self.doc, self.filename)
+        morpho = DXFFileWorker(self.window, self.doc, self.filename, self.current_morpho)
         morpho.make_polyline()
         messagebox.showinfo('Отрисовка полилинии', f'Полилиния нарисована.')
 
     def get_value(self):
-        c = self.choose_morpho_combobox.get()
-        print(c)
+        self.current_morpho = self.choose_morpho_combobox.get()
 
     def choose_morpho_to_draw(self):
-        int_var = IntVar(self.tab2)
         values = (1, 2, 3, 4, 5)
-        morpho_draw_selector = Combobox(self.tab2, textvariable=int_var, values=values)
+        morpho_draw_selector = Combobox(self.tab2, values=values)
         self.choose_morpho_combobox = morpho_draw_selector
         morpho_draw_selector_label = Label(self.tab2, text='Выберите морфоствор для отрисовки', padx=5, pady=5)
         morpho_draw_selector_label.grid(column=0, row=0)
         morpho_draw_selector.grid(column=1, row=0)
-        self.current_morpho = int_var.get()
-        morpho_draw_selector.bind("<<ComboboxSelected>>", self.get_value)
+
+    def get_morpho_data_button(self):
+        get_morpho_data = Button(self.tab2, text='Записать', command=self.get_value)
+        get_morpho_data.grid(column=2, row=0)
 
 
 class DXFFileWorker:
 
-    def __init__(self, interface, doc, filename):
+    def __init__(self, interface, doc, filename, cur_morpho):
         self.interface = interface
         self.doc = doc
         self.modelspace = self.doc.modelspace()
         self.filename = filename
+        self.cur_morpho = cur_morpho
 
     def make_polyline(self):
         """
         Функция создает полилинию
         :return:
         """
+        shift_constant = int(self.cur_morpho) * 10
         self.doc.layers.add(name='Морфостворы', color=7, linetype='CONTINUOUS')
         points = [(0, 0), (3, 0), (6, 3), (6, 6)]
-        self.modelspace.add_lwpolyline(points, dxfattribs={"layer": "Морфостворы"})
+        points_with_koeff = [(x + shift_constant, y + shift_constant) for x, y in points]
+        self.modelspace.add_lwpolyline(points_with_koeff, dxfattribs={"layer": "Морфостворы"})
 
 
 
